@@ -34,6 +34,28 @@ export default function NavBar() {
           </Link>
 
           <Link
+            to="/welfare-search"
+            className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors ${
+              isActive('/welfare-search') ? 'text-blue-600' : 'text-gray-600'
+            }`}
+          >
+            <svg
+              className="w-6 h-6 mb-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <span className="text-xs font-medium">복지찾기</span>
+          </Link>
+
+          <Link
             to="/phone"
             className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors ${
               isActive('/phone') ? 'text-blue-600' : 'text-gray-600'

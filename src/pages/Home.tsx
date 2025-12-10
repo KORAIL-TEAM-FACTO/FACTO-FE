@@ -1,102 +1,150 @@
 import NavBar from '../components/NavBar'
 
 export default function Home() {
-  const banners = [
-    { title: '신상품 할인', color: 'from-pink-500 to-rose-500' },
-    { title: '이벤트 진행중', color: 'from-blue-500 to-cyan-500' },
-    { title: '특가 세일', color: 'from-purple-500 to-indigo-500' },
+  const notices = [
+    { title: '2024년 하반기 복지서비스 신청 안내', date: '2024.12.10', badge: 'NEW' },
+    { title: '연말정산 지원금 신청하세요', date: '2024.12.08', badge: '마감임박' },
+    { title: '청년 주거지원 프로그램 안내', date: '2024.12.05', badge: '' },
   ]
 
   const categories = [
-    { icon: '🛒', name: '쇼핑' },
-    { icon: '🍔', name: '음식' },
-    { icon: '✈️', name: '여행' },
-    { icon: '🎬', name: '영화' },
-    { icon: '📚', name: '도서' },
-    { icon: '💊', name: '헬스' },
-    { icon: '🎮', name: '게임' },
-    { icon: '🎵', name: '음악' },
+    { icon: '💰', name: '생활지원', color: 'bg-blue-50 text-blue-600' },
+    { icon: '🏠', name: '주거', color: 'bg-green-50 text-green-600' },
+    { icon: '💼', name: '일자리', color: 'bg-purple-50 text-purple-600' },
+    { icon: '🎓', name: '교육', color: 'bg-orange-50 text-orange-600' },
+    { icon: '👶', name: '보육', color: 'bg-pink-50 text-pink-600' },
+    { icon: '❤️', name: '건강', color: 'bg-red-50 text-red-600' },
+    { icon: '🤝', name: '돌봄', color: 'bg-indigo-50 text-indigo-600' },
+    { icon: '⚖️', name: '법률', color: 'bg-gray-50 text-gray-600' },
   ]
 
-  const products = [
-    { name: '무선 이어폰', price: '89,000원', image: '🎧' },
-    { name: '스마트워치', price: '129,000원', image: '⌚' },
-    { name: '노트북', price: '1,290,000원', image: '💻' },
-    { name: '카메라', price: '890,000원', image: '📷' },
+  const services = [
+    {
+      title: '청년 월세 지원금',
+      description: '만 19~34세 청년 대상',
+      amount: '최대 월 20만원',
+      tag: '인기'
+    },
+    {
+      title: '아동수당',
+      description: '만 8세 미만 아동',
+      amount: '월 10만원',
+      tag: '신청가능'
+    },
+    {
+      title: '기초생활보장',
+      description: '소득인정액 기준 충족 가구',
+      amount: '맞춤형 지원',
+      tag: '상시모집'
+    },
+    {
+      title: '국민취업지원제도',
+      description: '구직활동 중인 청년·중장년',
+      amount: '최대 300만원',
+      tag: '신청가능'
+    },
   ]
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-md mx-auto bg-white min-h-screen">
         {/* Header */}
-        <div className="bg-blue-600 text-white p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">홈</h1>
-            <button className="p-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white p-6">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h1 className="text-[25px] font-bold text-gray-900 mb-2">
+                홍길동님 반가워요,
+              </h1>
+              <p className="text-[17px] text-gray-700">
+                받을 수 있는 복지 혜택이 <span className="font-bold text-blue-600">2개</span> 있어요
+              </p>
+            </div>
+            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </button>
           </div>
+        </div>
 
-          {/* Search Bar */}
+        {/* Search Bar */}
+        <div className="px-4 mb-6">
           <div className="relative">
             <input
               type="text"
-              placeholder="검색어를 입력하세요"
-              className="w-full bg-white text-gray-800 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              placeholder="복지서비스를 검색하세요"
+              className="w-full bg-gray-50 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 border border-gray-200"
             />
-            <svg className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
         </div>
 
-        {/* Banner Carousel */}
-        <div className="flex overflow-x-auto gap-4 p-4 scrollbar-hide">
-          {banners.map((banner, index) => (
-            <div
-              key={index}
-              className={`min-w-[280px] h-32 rounded-lg bg-gradient-to-r ${banner.color} flex items-center justify-center text-white font-bold text-xl shadow-lg`}
-            >
-              {banner.title}
-            </div>
-          ))}
-        </div>
-
-        {/* Categories */}
-        <div className="px-4 mb-6">
-          <h2 className="font-bold text-lg mb-3 text-gray-800">카테고리</h2>
-          <div className="grid grid-cols-4 gap-4">
-            {categories.map((category, index) => (
-              <button
+        {/* Recommended Services */}
+        <div className="px-4 pb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-[19px] text-gray-900">받을 수 있는 혜택</h2>
+            <button className="text-[15px] text-blue-600 font-medium">전체보기</button>
+          </div>
+          <div className="space-y-3">
+            {services.map((service, index) => (
+              <div
                 key={index}
-                className="flex flex-col items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow border border-gray-100"
               >
-                <div className="text-3xl mb-2">{category.icon}</div>
-                <div className="text-xs text-gray-700">{category.name}</div>
-              </button>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-[17px] text-gray-900">{service.title}</h3>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-[13px] font-semibold rounded">
+                        {service.tag}
+                      </span>
+                    </div>
+                    <p className="text-[15px] text-gray-600 mb-2">{service.description}</p>
+                    <p className="text-[17px] text-blue-600 font-bold">{service.amount}</p>
+                  </div>
+                  <button className="ml-2 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Products */}
+        {/* Recent Notices */}
         <div className="px-4 pb-4">
-          <h2 className="font-bold text-lg mb-3 text-gray-800">인기 상품</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {products.map((product, index) => (
-              <div
+          <h2 className="font-bold text-[19px] mb-3 text-gray-900">최근 공지사항</h2>
+          <div className="space-y-2">
+            {notices.map((notice, index) => (
+              <button
                 key={index}
-                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                className="w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors text-left border border-gray-100"
               >
-                <div className="aspect-square bg-gray-100 flex items-center justify-center text-6xl">
-                  {product.image}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      {notice.badge && (
+                        <span className={`px-2 py-0.5 text-[13px] font-semibold rounded ${
+                          notice.badge === 'NEW'
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-orange-100 text-orange-600'
+                        }`}>
+                          {notice.badge}
+                        </span>
+                      )}
+                      <h3 className="font-medium text-gray-900 text-[15px]">{notice.title}</h3>
+                    </div>
+                    <p className="text-[13px] text-gray-500">{notice.date}</p>
+                  </div>
+                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
-                <div className="p-3">
-                  <h3 className="font-semibold text-gray-800 text-sm mb-1">{product.name}</h3>
-                  <p className="text-blue-600 font-bold">{product.price}</p>
-                </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
