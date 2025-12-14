@@ -103,6 +103,44 @@ export default function Phone() {
     }
   }
 
+  // 통화 종료음 재생 함수
+  const playDisconnectTone = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.frequency.value = 480 // 통화종료음 주파수 (480Hz)
+    gainNode.gain.value = 0
+
+    oscillator.start()
+
+    // 빠른 "뚜-뚜-뚜-" 3번 (각 0.25초 재생, 0.1초 쉼)
+    const beepPattern = [
+      { start: 0, duration: 0.25 },      // 첫 번째 beep
+      { start: 0.35, duration: 0.25 },   // 두 번째 beep
+      { start: 0.7, duration: 0.25 },    // 세 번째 beep
+    ]
+
+    beepPattern.forEach(({ start, duration }) => {
+      const startTime = audioContext.currentTime + start
+      const endTime = startTime + duration
+
+      gainNode.gain.setValueAtTime(0, startTime)
+      gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.02)
+      gainNode.gain.setValueAtTime(0.15, endTime - 0.02)
+      gainNode.gain.linearRampToValueAtTime(0, endTime)
+    })
+
+    // 1초 후 정리
+    setTimeout(() => {
+      oscillator.stop()
+      audioContext.close()
+    }, 1000)
+  }
+
   // 컴포넌트 언마운트 시 연결음 정리
   useEffect(() => {
     return () => {
@@ -188,6 +226,9 @@ export default function Phone() {
     // 연결음 중지
     stopRingbackTone()
 
+    // 통화 종료음 재생
+    playDisconnectTone()
+
     // WebRTC 연결이 활성화되어 있으면 종료
     if (webrtcService.isConnected()) {
       try {
@@ -253,9 +294,21 @@ export default function Phone() {
 
   // 통화 중 화면
   if (isCalling) {
+    const isAICall = phoneNumber.replace(/-/g, '') === AI_CALL_NUMBER.replace(/-/g, '')
+    const isAISpeaking = isAICall && vadStatus.isAIResponding
+
     return (
-      <div className="min-h-screen bg-white pb-20">
-        <div className="max-w-md mx-auto min-h-screen flex flex-col">
+      <div className="min-h-screen bg-white pb-20 relative overflow-hidden">
+        {/* AI 응답 중 배경 그라디언트 애니메이션 */}
+        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${
+          isAISpeaking ? 'opacity-30' : 'opacity-0'
+        }`}>
+          <div className="absolute top-0 -left-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+          <div className="absolute top-0 -right-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-1/4 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="max-w-md mx-auto min-h-screen flex flex-col relative z-10">
           {/* Hidden Audio Element for Remote Stream */}
           <audio ref={remoteAudioRef} autoPlay />
 
@@ -272,41 +325,7 @@ export default function Phone() {
             <h2 className="text-3xl font-normal mb-2 text-gray-900">{formatPhoneNumber(phoneNumber)}</h2>
 
             {/* Call Status */}
-            <p className="text-lg text-gray-500 mb-4">{formatDuration(callDuration)}</p>
-
-            {/* VAD Status - AI 통화인 경우에만 표시 */}
-            {phoneNumber.replace(/-/g, '') === AI_CALL_NUMBER.replace(/-/g, '') && (
-              <div className="mb-12 w-full max-w-sm">
-                {/* VAD 상태 표시 */}
-                <div className="bg-gray-50 rounded-xl p-4 mb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">음량</span>
-                    <span className="text-lg font-bold text-gray-900">
-                      {vadStatus.volume > -100 ? `${vadStatus.volume.toFixed(1)} dB` : '-∞'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">상태</span>
-                    <span className="text-lg font-bold">
-                      {vadStatus.isAIResponding ? '🤖 AI 응답 중' :
-                       vadStatus.isSpeaking ? '🗣️ 말하는 중' : '💤 대기 중'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 전송/응답 카운터 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-blue-50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-blue-600 mb-1">전송 횟수</div>
-                    <div className="text-xl font-bold text-blue-600">{vadStatus.audioSentCount}</div>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-green-600 mb-1">AI 응답</div>
-                    <div className="text-xl font-bold text-green-600">{vadStatus.aiResponseCount}</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <p className="text-lg text-gray-500 mb-16">{formatDuration(callDuration)}</p>
 
             {/* Action Buttons */}
             <div className="grid grid-cols-3 gap-8 w-full max-w-sm mb-12">
