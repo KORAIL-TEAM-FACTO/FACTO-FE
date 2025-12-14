@@ -36,8 +36,8 @@ export interface RegisterRequest {
   password: string;
   name: string;
   life_cycle: LifeCycle;
-  household_status: HouseholdStatus;
-  interest_theme: InterestTheme;
+  household_status: HouseholdStatus[];
+  interest_theme: InterestTheme[];
   age: number;
   sido_name: string;
   sigungu_name: string;

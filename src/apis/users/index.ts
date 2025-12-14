@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import instance from "../client";
 import { setCookie, deleteCookie } from "../../utils/cookies";
 import type {
   RegisterRequest,
@@ -8,24 +7,25 @@ import type {
   User,
   UpdateProfileRequest,
 } from "./types";
+import { instance2 } from "../client";
 
 // API Functions
 const register = async (data: RegisterRequest): Promise<void> => {
-  await instance.post("/users/register", data);
+  await instance2.post("/users/register", data);
 };
 
 const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await instance.post<LoginResponse>("/users/login", data);
+  const response = await instance2.post<LoginResponse>("/users/login", data);
   return response.data;
 };
 
 const getMe = async (): Promise<User> => {
-  const response = await instance.get<User>("/users/me");
+  const response = await instance2.get<User>("/users/me");
   return response.data;
 };
 
 const updateProfile = async (data: UpdateProfileRequest): Promise<void> => {
-  await instance.patch("/users/me", data);
+  await instance2.patch("/users/me", data);
 };
 
 // React Query Hooks

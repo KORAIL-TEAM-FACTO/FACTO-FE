@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import instance from "../client";
+import { instance2 } from "../client";
 import type {
   RecentView,
   TrendingService,
@@ -9,13 +9,13 @@ import type {
 
 // API Functions
 const addRecentView = async (welfareServiceId: string): Promise<void> => {
-  await instance.post(`/recent-views/${welfareServiceId}`);
+  await instance2.post(`/recent-views/${welfareServiceId}`);
 };
 
 const getRecentViews = async (
   params?: RecentViewsParams
 ): Promise<RecentView[]> => {
-  const response = await instance.get<RecentView[]>("/recent-views", {
+  const response = await instance2.get<RecentView[]>("/recent-views", {
     params,
   });
   return response.data;
@@ -24,7 +24,7 @@ const getRecentViews = async (
 const getTrendingServices = async (
   params?: TrendingParams
 ): Promise<TrendingService[]> => {
-  const response = await instance.get<TrendingService[]>(
+  const response = await instance2.get<TrendingService[]>(
     "/recent-views/trending",
     { params }
   );

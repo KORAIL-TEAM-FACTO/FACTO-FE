@@ -1,8 +1,14 @@
 import axios from "axios";
 import { getCookie, deleteCookie } from "../utils/cookies";
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+export const instance2 = axios.create({
+  baseURL: import.meta.env.VITE_PARK_URL || "/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,6 +22,7 @@ const isAuthRequired = (url?: string): boolean => {
     const path = new URL(url, instance.defaults.baseURL).pathname;
     return AUTH_REQUIRED_PATHS.some((pattern) => pattern.test(path));
   } catch (error) {
+    console.log(error);
     return false;
   }
 };
@@ -48,5 +55,3 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-export default instance;
