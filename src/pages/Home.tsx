@@ -16,8 +16,12 @@ interface WelfareService {
 
 export default function Home() {
   const navigate = useNavigate();
-  const [customizedServices, setCustomizedServices] = useState<WelfareService[]>([]);
-  const [trendingServices, setTrendingServices] = useState<WelfareService[]>([]);
+  const [customizedServices, setCustomizedServices] = useState<
+    WelfareService[]
+  >([]);
+  const [trendingServices, setTrendingServices] = useState<WelfareService[]>(
+    []
+  );
   const [isLoadingCustom, setIsLoadingCustom] = useState(true);
   const [isLoadingTrending, setIsLoadingTrending] = useState(true);
   const [userName, setUserName] = useState("홍길동");
@@ -193,7 +197,8 @@ export default function Home() {
           ) : (
             <div className="text-center py-12 px-4">
               <p className="text-gray-600 text-[15px]">
-                로그인하시면 맞춤형 복지 서비스를 추천해드립니다.
+                맞춤형 복지 서비스가 없습니다. 챗봇 AI를 통해 복지 서비스를
+                찾아보세요!
               </p>
             </div>
           )}
