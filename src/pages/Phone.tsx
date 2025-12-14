@@ -276,9 +276,9 @@ export default function Phone() {
   // 연결 중 화면
   if (isConnecting) {
     return (
-      <div className="h-screen bg-white pb-20">
+      <div className="h-screen bg-white">
         <div className="max-w-md mx-auto h-full flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
             <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mb-8 animate-pulse">
               <svg className="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -298,7 +298,7 @@ export default function Phone() {
     const isAISpeaking = isAICall && vadStatus.isAIResponding
 
     return (
-      <div className="h-screen bg-white pb-20 relative overflow-hidden">
+      <div className="h-screen bg-white relative overflow-hidden">
         {/* AI 응답 중 배경 그라디언트 애니메이션 */}
         <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${
           isAISpeaking ? 'opacity-30' : 'opacity-0'
@@ -313,7 +313,7 @@ export default function Phone() {
           <audio ref={remoteAudioRef} autoPlay />
 
           {/* Call Status */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
             {/* Avatar */}
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-8">
               <svg className="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
@@ -378,8 +378,8 @@ export default function Phone() {
 
   // 키패드 화면
   return (
-    <div className="h-screen bg-white pb-20 flex items-center justify-center">
-      <div className="max-w-md w-full">
+    <div className="h-screen bg-white flex items-center justify-center">
+      <div className="max-w-md w-full pb-20">
         {/* Header */}
         <div className="px-6 pb-4">
           {/* Phone Number Display */}
