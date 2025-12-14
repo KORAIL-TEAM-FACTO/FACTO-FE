@@ -1,0 +1,35 @@
+export interface WelfareService {
+  service_id: string;
+  service_name: string;
+  service_summary: string;
+  ai_summary: string;
+  ctpv_nm: string;
+  sgg_nm: string;
+  biz_chr_dept_nm: string;
+  support_type: string;
+  support_cycle: string;
+  application_method: string;
+  life_cycle_array: string;
+  target_array: string;
+  interest_theme_array: string;
+  support_target_content: string;
+  selection_criteria: string;
+  service_content: string;
+  application_method_content: string;
+  inquiry_count: number;
+  detail_link: string;
+  last_modified_date: string;
+  service_type: string;
+  service_url: string;
+  site: string;
+  contact: string;
+  department: string;
+  organization: string;
+  base_year: number;
+  organization_name: string;
+  project_start_date: string;
+  project_end_date: string;
+  required_documents: string;
+  etc: string;
+  household_status: string;
+}
