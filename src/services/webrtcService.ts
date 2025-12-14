@@ -7,6 +7,7 @@ const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL || 'http://localhost:30
 const VOLUME_THRESHOLD = -19 // dB (19 데시벨 이상만 감지)
 const SILENCE_DURATION = 1000 // 1초
 const CHECK_INTERVAL = 100 // 100ms
+const MINIMUM_RECORDING_DURATION = 3000 // 3초 - 최소 녹음 시간
 
 export interface CallData {
   id: string
@@ -54,6 +55,7 @@ class WebRTCService {
   private audioSentCount = 0
   private aiResponseCount = 0
   private lastAudioSentTime = 0 // 마지막 오디오 전송 시간
+  private recordingStartTime = 0 // 녹음 시작 시간
 
   // 콜백
   private onVADStatusChange?: (status: VADStatus) => void
@@ -191,26 +193,41 @@ class WebRTCService {
       } else {
         // 침묵 체크 (-19dB 이하가 1초 동안 지속)
         if (this.isSpeaking && silenceDuration > SILENCE_DURATION) {
-          console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
-          console.log(`🔇 [침묵 감지] ${new Date().toLocaleTimeString()}.${now % 1000}`)
-          console.log(`   🔊 음량: ${volume.toFixed(1)}dB <= ${VOLUME_THRESHOLD}dB`)
-          console.log(`   ⏱️  침묵 지속 시간: ${(silenceDuration / 1000).toFixed(2)}초 > ${SILENCE_DURATION / 1000}초`)
-          console.log(`   📊 상태 변경 전:`)
-          console.log(`      - isSpeaking: ${this.isSpeaking} → false`)
-          console.log(`      - isRecording: ${this.isRecording}`)
-          console.log(`      - isWaitingForAIResponse: ${this.isWaitingForAIResponse}`)
-          console.log(`      - isAIResponding: ${this.isAIResponding}`)
+          // 녹음 시간 체크 - 3초 미만이면 침묵 감지 무시하고 계속 녹음
+          const currentRecordingDuration = this.recordingStartTime > 0 ? now - this.recordingStartTime : 0
 
-          this.isSpeaking = false
-          console.log(`   ✅ isSpeaking = false 설정 완료`)
-
-          if (this.isRecording) {
-            console.log(`   🛑 녹음 중지 호출 (stopRecording)`)
-            this.stopRecording()
+          if (currentRecordingDuration < MINIMUM_RECORDING_DURATION) {
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+            console.log(`⏳ [침묵 감지 무시] ${new Date().toLocaleTimeString()}.${now % 1000}`)
+            console.log(`   🔊 음량: ${volume.toFixed(1)}dB <= ${VOLUME_THRESHOLD}dB`)
+            console.log(`   ⏱️  침묵 지속: ${(silenceDuration / 1000).toFixed(2)}초`)
+            console.log(`   ⏱️  녹음 시간: ${(currentRecordingDuration / 1000).toFixed(2)}초 < ${MINIMUM_RECORDING_DURATION / 1000}초`)
+            console.log(`   ⚠️  최소 녹음 시간 미달 - 침묵 무시하고 계속 녹음`)
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+            // 침묵 무시하고 계속 녹음 (isSpeaking 유지)
           } else {
-            console.log(`   ⚠️  녹음 중이 아님 - stopRecording 호출 안 함`)
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+            console.log(`🔇 [침묵 감지] ${new Date().toLocaleTimeString()}.${now % 1000}`)
+            console.log(`   🔊 음량: ${volume.toFixed(1)}dB <= ${VOLUME_THRESHOLD}dB`)
+            console.log(`   ⏱️  침묵 지속 시간: ${(silenceDuration / 1000).toFixed(2)}초 > ${SILENCE_DURATION / 1000}초`)
+            console.log(`   ⏱️  녹음 시간: ${(currentRecordingDuration / 1000).toFixed(2)}초 >= ${MINIMUM_RECORDING_DURATION / 1000}초`)
+            console.log(`   📊 상태 변경 전:`)
+            console.log(`      - isSpeaking: ${this.isSpeaking} → false`)
+            console.log(`      - isRecording: ${this.isRecording}`)
+            console.log(`      - isWaitingForAIResponse: ${this.isWaitingForAIResponse}`)
+            console.log(`      - isAIResponding: ${this.isAIResponding}`)
+
+            this.isSpeaking = false
+            console.log(`   ✅ isSpeaking = false 설정 완료`)
+
+            if (this.isRecording) {
+              console.log(`   🛑 녹음 중지 호출 (stopRecording)`)
+              this.stopRecording()
+            } else {
+              console.log(`   ⚠️  녹음 중이 아님 - stopRecording 호출 안 함`)
+            }
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
           }
-          console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
         }
       }
 
@@ -254,17 +271,19 @@ class WebRTCService {
       this.mediaRecorder.onstop = () => {
         const blob = new Blob(this.recordedChunks, { type: 'audio/webm' })
         const stopTime = Date.now()
+        const recordingDuration = this.recordingStartTime > 0 ? stopTime - this.recordingStartTime : 0
 
         console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
         console.log(`⏹️ [onstop 콜백] 녹음 완료`)
         console.log(`   🕐 완료 시간: ${new Date().toLocaleTimeString()}.${stopTime % 1000}`)
+        console.log(`   ⏱️  녹음 시간: ${(recordingDuration / 1000).toFixed(2)}초`)
         console.log(`   📦 크기: ${(blob.size / 1024).toFixed(1)}KB`)
         console.log(`   📊 현재 상태:`)
         console.log(`      - isRecording: ${this.isRecording}`)
         console.log(`      - isWaitingForAIResponse: ${this.isWaitingForAIResponse ? '⛔ true' : '✅ false'}`)
         console.log(`      - isAIResponding: ${this.isAIResponding ? '⛔ true' : '✅ false'}`)
 
-        // onstop에서도 상태 체크 - AI 대기/응답 중이면 전송하지 않음
+        // AI 상태 체크 - AI 대기/응답 중이면 전송하지 않음
         if (this.isWaitingForAIResponse || this.isAIResponding) {
           const reason = this.isWaitingForAIResponse ? 'AI 응답 대기 중' : 'AI 응답 중'
           console.log(`❌ [onstop 차단] ${reason} - sendAudio 호출 안 함`)
@@ -279,10 +298,10 @@ class WebRTCService {
 
       this.mediaRecorder.start()
       this.isRecording = true
-      const startTime = Date.now()
+      this.recordingStartTime = Date.now()
       console.log(`   ✅ MediaRecorder.start() 호출 완료`)
       console.log(`   🔒 isRecording = true 설정`)
-      console.log(`   🕐 시작 시간: ${new Date().toLocaleTimeString()}.${startTime % 1000}`)
+      console.log(`   🕐 시작 시간: ${new Date().toLocaleTimeString()}.${this.recordingStartTime % 1000}`)
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
     } catch (e) {
       console.error('❌ 녹음 실패:', e)
