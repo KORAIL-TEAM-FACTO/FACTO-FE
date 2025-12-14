@@ -1,32 +1,7 @@
 import NavBar from '../components/NavBar'
 import { IoSend } from 'react-icons/io5'
-import { useState, useEffect } from 'react'
 
 export default function WelfareSearch() {
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
-
-  useEffect(() => {
-    const handleResize = () => {
-      // 모바일에서 키보드가 올라오면 visualViewport 높이가 변경됨
-      if (window.visualViewport) {
-        const viewportHeight = window.visualViewport.height
-        const windowHeight = window.innerHeight
-        setKeyboardHeight(windowHeight - viewportHeight)
-      }
-    }
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize)
-      window.visualViewport.addEventListener('scroll', handleResize)
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize)
-        window.visualViewport.removeEventListener('scroll', handleResize)
-      }
-    }
-  }, [])
 
   return (
     <div className="min-h-screen bg-white pb-32 relative">
@@ -88,10 +63,7 @@ export default function WelfareSearch() {
       </div>
 
       {/* Input Box */}
-      <div
-        className="fixed bottom-20 left-0 right-0 px-4 transition-all duration-300"
-        style={{ transform: `translateY(-${keyboardHeight}px)` }}
-      >
+      <div className="fixed bottom-20 left-0 right-0 px-4">
         <div className="max-w-md mx-auto">
           <div className="bg-white rounded-full px-5 py-3 flex items-center gap-3 shadow-[0_0_20px_rgba(59,130,246,0.5),0_0_40px_rgba(147,51,234,0.3)] border border-gray-100">
             <input
