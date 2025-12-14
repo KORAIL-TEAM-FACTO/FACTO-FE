@@ -276,9 +276,9 @@ export default function Phone() {
   // 연결 중 화면
   if (isConnecting) {
     return (
-      <div className="h-screen bg-white">
-        <div className="max-w-md mx-auto h-full flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+      <div className="min-h-screen bg-white pb-20 pt-[200px]">
+        <div className="h-full flex items-center justify-center">
+          <div className="max-w-md mx-auto flex flex-col items-center justify-center px-6">
             <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mb-8 animate-pulse">
               <svg className="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -298,7 +298,7 @@ export default function Phone() {
     const isAISpeaking = isAICall && vadStatus.isAIResponding
 
     return (
-      <div className="h-screen bg-white relative overflow-hidden">
+      <div className="min-h-screen bg-white relative overflow-hidden pb-20 pt-[200px]">
         {/* AI 응답 중 배경 그라디언트 애니메이션 */}
         <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${
           isAISpeaking ? 'opacity-30' : 'opacity-0'
@@ -308,12 +308,13 @@ export default function Phone() {
           <div className="absolute -bottom-8 left-1/4 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="max-w-md mx-auto h-full flex flex-col relative z-10">
-          {/* Hidden Audio Element for Remote Stream */}
-          <audio ref={remoteAudioRef} autoPlay />
+        <div className="h-full flex items-center justify-center relative z-10">
+          <div className="max-w-md mx-auto w-full">
+            {/* Hidden Audio Element for Remote Stream */}
+            <audio ref={remoteAudioRef} autoPlay />
 
-          {/* Call Status */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+            {/* Call Status */}
+            <div className="flex flex-col items-center justify-center px-6">
             {/* Avatar */}
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-8">
               <svg className="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
@@ -370,6 +371,7 @@ export default function Phone() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </button>
+            </div>
           </div>
         </div>
       </div>
@@ -378,8 +380,9 @@ export default function Phone() {
 
   // 키패드 화면
   return (
-    <div className="h-screen bg-white flex items-center justify-center">
-      <div className="max-w-md w-full pb-20">
+    <div className="min-h-screen bg-white pb-20 pt-[200px]">
+      <div className="h-full flex items-center justify-center">
+        <div className="max-w-md w-full">
         {/* Header */}
         <div className="px-6 pb-4">
           {/* Phone Number Display */}
@@ -447,6 +450,7 @@ export default function Phone() {
               </svg>
             </button>
           </div>
+        </div>
         </div>
       </div>
       <NavBar />
