@@ -1,8 +1,14 @@
 import axios from "axios";
 import { getCookie, deleteCookie } from "../utils/cookies";
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+export const instance2 = axios.create({
+  baseURL: import.meta.env.VITE_PARK_URL || "/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -49,5 +55,3 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-export default instance;
