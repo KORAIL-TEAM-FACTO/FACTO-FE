@@ -16,6 +16,7 @@ const isAuthRequired = (url?: string): boolean => {
     const path = new URL(url, instance.defaults.baseURL).pathname;
     return AUTH_REQUIRED_PATHS.some((pattern) => pattern.test(path));
   } catch (error) {
+    console.log(error);
     return false;
   }
 };
