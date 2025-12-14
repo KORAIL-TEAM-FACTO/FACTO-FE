@@ -1,126 +1,111 @@
 import NavBar from '../components/NavBar'
+import { IoSend } from 'react-icons/io5'
+import { useState, useEffect } from 'react'
 
 export default function WelfareSearch() {
-  const categories = [
-    { icon: '💰', name: '생활지원', color: 'bg-blue-50 text-blue-600' },
-    { icon: '🏠', name: '주거', color: 'bg-green-50 text-green-600' },
-    { icon: '💼', name: '일자리', color: 'bg-purple-50 text-purple-600' },
-    { icon: '🎓', name: '교육', color: 'bg-orange-50 text-orange-600' },
-    { icon: '👶', name: '보육', color: 'bg-pink-50 text-pink-600' },
-    { icon: '❤️', name: '건강', color: 'bg-red-50 text-red-600' },
-    { icon: '🤝', name: '돌봄', color: 'bg-indigo-50 text-indigo-600' },
-    { icon: '⚖️', name: '법률', color: 'bg-gray-50 text-gray-600' },
-  ]
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
-  const lifecycleOptions = [
-    '영유아', '아동', '청소년', '청년', '중장년', '노년', '임신·출산'
-  ]
+  useEffect(() => {
+    const handleResize = () => {
+      // 모바일에서 키보드가 올라오면 visualViewport 높이가 변경됨
+      if (window.visualViewport) {
+        const viewportHeight = window.visualViewport.height
+        const windowHeight = window.innerHeight
+        setKeyboardHeight(windowHeight - viewportHeight)
+      }
+    }
 
-  const householdOptions = [
-    '다문화·탈북민', '다자녀', '보훈대상자', '장애인', '저소득', '한부모·조손'
-  ]
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize)
+      window.visualViewport.addEventListener('scroll', handleResize)
+    }
 
-  const popularServices = [
-    { title: '청년 월세 지원금', tag: '인기' },
-    { title: '기초생활보장', tag: '인기' },
-    { title: '아동수당', tag: '인기' },
-    { title: '국민취업지원제도', tag: '인기' },
-  ]
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize)
+        window.visualViewport.removeEventListener('scroll', handleResize)
+      }
+    }
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-md mx-auto bg-white min-h-screen">
-        {/* Header */}
-        <div className="bg-white p-6 border-b border-gray-200">
-          <h1 className="text-[25px] font-bold text-gray-900 mb-2">복지 찾아보기</h1>
-          <p className="text-[15px] text-gray-600">필요한 복지 서비스를 찾아보세요</p>
+    <div className="min-h-screen bg-white pb-32 relative">
+      {/* Chat Message */}
+      <div className="px-4 py-6 flex justify-end">
+        <div className="bg-gray-100 rounded-2xl px-5 py-4 max-w-[85%]">
+          <p className="text-base text-gray-900">
+            청년이고 이사할때 복지 혜택을 받고 싶어
+          </p>
         </div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="p-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="복지서비스를 검색하세요"
-              className="w-full bg-gray-50 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 border border-gray-200"
-            />
-            <svg className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
+      {/* Response Section */}
+      <div className="px-4 py-2 pb-24">
+        <div className="space-y-4 text-gray-800">
+          <p className="text-base leading-relaxed">
+            안녕하세요. 청년 이사 관련 복지 혜택에 대해 문의 주셨군요. 이사는 청년들에게 큰 부담이 될 수 있어 이사비를 지원하는 지방자치단체(지자체) 사업들이 있습니다.
+          </p>
 
-        {/* Categories */}
-        <div className="px-4 mb-6">
-          <h2 className="font-bold text-[19px] mb-3 text-gray-900">복지 분야</h2>
-          <div className="grid grid-cols-4 gap-3">
-            {categories.map((category, index) => (
-              <button
-                key={index}
-                className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
-              >
-                <div className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center text-2xl`}>
-                  {category.icon}
-                </div>
-                <div className="text-[13px] text-gray-700 font-medium">{category.name}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+          <p className="text-base leading-relaxed">
+            <strong>**주요 지원 혜택은 주로 '청년 부동산 중개보수 및 이사비 지원사업'**</strong>의 형태이며, 지자체별로 지원 내용 및 자격 요건에 차이가 있습니다.
+          </p>
 
-        {/* Lifecycle */}
-        <div className="px-4 mb-6">
-          <h2 className="font-bold text-[19px] mb-3 text-gray-900">생애주기</h2>
-          <div className="flex flex-wrap gap-2">
-            {lifecycleOptions.map((option, index) => (
-              <button
-                key={index}
-                className="px-4 py-2 bg-white rounded-full text-[14px] font-medium text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
+          <p className="text-base leading-relaxed">
+            일반적으로는 다음과 같은 내용을 지원받을 수 있습니다:
+          </p>
 
-        {/* Household Situation */}
-        <div className="px-4 mb-6">
-          <h2 className="font-bold text-[19px] mb-3 text-gray-900">가구상황</h2>
-          <div className="flex flex-wrap gap-2">
-            {householdOptions.map((option, index) => (
-              <button
-                key={index}
-                className="px-4 py-2 bg-white rounded-full text-[14px] font-medium text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <span className="text-xl">🏠</span>
+              <h3 className="text-lg font-bold text-gray-900">청년 이사비 지원사업 주요 내용</h3>
+            </div>
 
-        {/* Popular Services */}
-        <div className="px-4 pb-4">
-          <h2 className="font-bold text-[19px] mb-3 text-gray-900">많이 찾는 복지</h2>
-          <div className="space-y-2">
-            {popularServices.map((service, index) => (
-              <button
-                key={index}
-                className="w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors text-left border border-gray-100 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-[17px] font-medium text-gray-900">{service.title}</span>
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-[13px] font-semibold rounded">
-                    {service.tag}
-                  </span>
-                </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            ))}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">• 지원 대상:</h4>
+              <div className="pl-4 space-y-1 text-gray-700">
+                <p>• 연령: 만 19세에서 39세 사이의 청년<br />
+                <span className="text-sm text-gray-500">(지자체별로 연령 기준 상이)</span></p>
+                <p>• 주택: 무주택자이며, 특정 보증금 또는 전월세 거래금액 이하의 주택에 거주하는 청년 (예: 보증금 1억원 이하 등)</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">• 지원 내용:</h4>
+              <div className="pl-4 space-y-1 text-gray-700">
+                <p>• 이사비용: 실비 지원 (예: 최대 30만원)</p>
+                <p>• 중개보수: 부동산 중개 수수료 지원 (예: 최대 20만원)</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">• 신청 방법:</h4>
+              <div className="pl-4 text-gray-700">
+                <p>거주지 관할 지자체(구청, 시청 등)의 홈페이지 또는 방문 신청</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Input Box */}
+      <div
+        className="fixed bottom-20 left-0 right-0 px-4 transition-all duration-300"
+        style={{ transform: `translateY(-${keyboardHeight}px)` }}
+      >
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-full px-5 py-3 flex items-center gap-3 shadow-[0_0_20px_rgba(59,130,246,0.5),0_0_40px_rgba(147,51,234,0.3)] border border-gray-100">
+            <input
+              type="text"
+              placeholder="메시지를 입력하세요..."
+              className="flex-1 bg-transparent outline-none text-base text-gray-900 placeholder-gray-400"
+            />
+            <button className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex-shrink-0 hover:from-blue-600 hover:to-purple-700 transition-all">
+              <IoSend className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+
       <NavBar />
     </div>
   )
