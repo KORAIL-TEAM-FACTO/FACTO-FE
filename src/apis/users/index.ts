@@ -1,11 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { setCookie, deleteCookie } from "../../utils/cookies";
 import type {
   RegisterRequest,
   LoginRequest,
   LoginResponse,
   User,
-  UpdateProfileRequest,
 } from "./types";
 import { instance2 } from "../client";
 
@@ -22,10 +21,6 @@ const login = async (data: LoginRequest): Promise<LoginResponse> => {
 const getMe = async (): Promise<User> => {
   const response = await instance2.get<User>("/users/me");
   return response.data;
-};
-
-const updateProfile = async (data: UpdateProfileRequest): Promise<void> => {
-  await instance2.patch("/users/me", data);
 };
 
 // React Query Hooks
@@ -49,17 +44,6 @@ export const useMe = () => {
   return useQuery({
     queryKey: ["user", "me"],
     queryFn: getMe,
-  });
-};
-
-export const useUpdateProfile = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
-    },
   });
 };
 
