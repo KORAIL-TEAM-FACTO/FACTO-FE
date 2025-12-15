@@ -13,3 +13,7 @@ export type * from "./recentViews/types";
 // Welfare Services API
 export * from "./welfareServices";
 export type * from "./welfareServices/types";
+
+// Chat API
+export * from "./chat";
+export type * from "./chat/types";

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import { instance2 } from "../apis/client";
+import { useMe } from "../apis";
 
 interface WelfareService {
   service_id: string;
@@ -16,6 +17,7 @@ interface WelfareService {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { data: user, isLoading: isUserLoading } = useMe();
   const [customizedServices, setCustomizedServices] = useState<
     WelfareService[]
   >([]);
@@ -24,7 +26,6 @@ export default function Home() {
   );
   const [isLoadingCustom, setIsLoadingCustom] = useState(true);
   const [isLoadingTrending, setIsLoadingTrending] = useState(true);
-  const [userName, setUserName] = useState("홍길동");
 
   useEffect(() => {
     const fetchCustomizedServices = async () => {
@@ -34,14 +35,6 @@ export default function Home() {
         });
 
         setCustomizedServices(response.data);
-
-        // 사용자 정보 가져오기
-        try {
-          const userResponse = await instance2.get("/users/me");
-          setUserName(userResponse.data.name);
-        } catch (userError) {
-          console.log("사용자 정보 조회 실패 (로그인 필요):", userError);
-        }
       } catch (error) {
         console.error("맞춤형 복지 서비스 조회 실패:", error);
       } finally {
@@ -96,9 +89,13 @@ export default function Home() {
         <div className="bg-white p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-[25px] font-bold text-gray-900 mb-2">
-                {userName}님 반가워요,
-              </h1>
+              {isUserLoading ? (
+                <div className="h-8 w-40 bg-gray-200 rounded animate-pulse mb-2"></div>
+              ) : (
+                <h1 className="text-[25px] font-bold text-gray-900 mb-2">
+                  {user?.name}님 반가워요,
+                </h1>
+              )}
               <p className="text-[17px] text-gray-700">
                 받을 수 있는 복지 혜택이{" "}
                 <span className="font-bold text-blue-600">

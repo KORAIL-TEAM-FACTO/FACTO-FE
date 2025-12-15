@@ -1,65 +1,267 @@
-import NavBar from '../components/NavBar'
-import { IoSend } from 'react-icons/io5'
+import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { IoSend } from "react-icons/io5";
+import NavBar from "../components/NavBar";
+import { useChatSend } from "../apis";
+
+type ChatMessage = {
+  role: "USER" | "ASSISTANT";
+  content: string;
+};
+
+type StreamEvent =
+  | { sessionId: string; type: "START" }
+  | { sessionId: string; type: "STREAMING"; content: string }
+  | { sessionId: string; type: "END" }
+  | { sessionId: string; type: "ERROR"; content: string };
 
 export default function WelfareSearch() {
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<WebSocket | null>(null);
+  const streamingRef = useRef("");
+
+  const { mutateAsync: sendChat, isPending } = useChatSend();
+
+  const renderInline = (text: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/);
+    return parts.map((part, idx) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return (
+          <strong key={idx} className="font-semibold">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
+  };
+
+  const renderMessage = (text: string) => {
+    const paragraphs = text.trim().split(/\n{2,}/);
+    return paragraphs.map((para, pIdx) => {
+      const lines = para.split("\n");
+      const isBullets = lines.every(
+        (l) => l.trim().startsWith("-") || l.trim().startsWith("•")
+      );
+      if (isBullets) {
+        return (
+          <ul
+            key={pIdx}
+            className="list-disc pl-4 space-y-1 text-base text-gray-900"
+          >
+            {lines.map((line, liIdx) => {
+              const clean = line.replace(/^[-•]\s*/, "");
+              return <li key={liIdx}>{renderInline(clean)}</li>;
+            })}
+          </ul>
+        );
+      }
+      return (
+        <p
+          key={pIdx}
+          className="text-base text-gray-900 whitespace-pre-wrap leading-relaxed"
+        >
+          {renderInline(para)}
+        </p>
+      );
+    });
+  };
+
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    // Cleanup socket on unmount
+    return () => {
+      socketRef.current?.close();
+    };
+  }, []);
+
+  const buildWsUrl = () => {
+    const base = import.meta.env.VITE_PARK_URL || window.location.origin;
+    try {
+      const url = new URL(base);
+      url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+      url.pathname =
+        (url.pathname.endsWith("/")
+          ? url.pathname.slice(0, -1)
+          : url.pathname) + "/ws/chat";
+      return url.toString();
+    } catch (_) {
+      return base.replace(/^http/, "ws") + "/ws/chat";
+    }
+  };
+
+  const startStreaming = (userText: string) => {
+    const wsUrl = buildWsUrl();
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+    setIsStreaming(true);
+    setStreamingContent("");
+    streamingRef.current = "";
+
+    socket.onopen = () => {
+      const payload = {
+        sessionId,
+        message: userText,
+      };
+      socket.send(JSON.stringify(payload));
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data: StreamEvent = JSON.parse(event.data);
+        if (data.type === "START") {
+          setSessionId(data.sessionId);
+        } else if (data.type === "STREAMING") {
+          setStreamingContent((prev) => {
+            const next = prev + data.content;
+            streamingRef.current = next;
+            return next;
+          });
+        } else if (data.type === "END") {
+          const finalText = streamingRef.current;
+          if (finalText.trim()) {
+            setMessages((prev) => [
+              ...prev,
+              { role: "ASSISTANT", content: finalText },
+            ]);
+            setStreamingContent("");
+            streamingRef.current = "";
+          }
+          setIsStreaming(false);
+          socket.close();
+        } else if (data.type === "ERROR") {
+          setError(data.content || "스트리밍 중 오류가 발생했습니다.");
+          setIsStreaming(false);
+          setStreamingContent("");
+          streamingRef.current = "";
+          socket.close();
+        }
+      } catch (err) {
+        setError("응답 파싱 중 오류가 발생했습니다.");
+        setIsStreaming(false);
+        setStreamingContent("");
+        streamingRef.current = "";
+        socket.close();
+      }
+    };
+
+    socket.onerror = () => {
+      setError("스트리밍 연결에 실패했습니다.");
+      setIsStreaming(false);
+      setStreamingContent("");
+      streamingRef.current = "";
+    };
+
+    socket.onclose = () => {
+      socketRef.current = null;
+    };
+  };
+
+  const handleSend = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isPending || isStreaming) return;
+    setError(null);
+
+    const userMsg: ChatMessage = { role: "USER", content: trimmed };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    // Start WebSocket streaming; fallback to REST if WS fails to open
+    try {
+      startStreaming(trimmed);
+    } catch (e) {
+      // Fallback: REST 단건 응답
+      try {
+        const res = await sendChat({ sessionId, message: trimmed });
+        setSessionId(res.sessionId);
+        setMessages((prev) => [
+          ...prev,
+          { role: "ASSISTANT", content: res.message },
+        ]);
+      } catch {
+        setError("응답을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      } finally {
+        setIsStreaming(false);
+      }
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white pb-32 relative">
-      {/* Chat Message */}
-      <div className="px-4 py-6 flex justify-end">
-        <div className="bg-gray-100 rounded-2xl px-5 py-4 max-w-[85%]">
-          <p className="text-base text-gray-900">
-            청년이고 이사할때 복지 혜택을 받고 싶어
-          </p>
-        </div>
-      </div>
+      <div className="px-4 pt-6 pb-24 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-500 text-sm">
+            궁금한 복지 서비스를 물어보세요. 예) "수원 청년 창업 지원금 알려줘"
+          </div>
+        )}
 
-      {/* Response Section */}
-      <div className="px-4 py-2 pb-24">
-        <div className="space-y-4 text-gray-800">
-          <p className="text-base leading-relaxed">
-            안녕하세요. 청년 이사 관련 복지 혜택에 대해 문의 주셨군요. 이사는 청년들에게 큰 부담이 될 수 있어 이사비를 지원하는 지방자치단체(지자체) 사업들이 있습니다.
-          </p>
-
-          <p className="text-base leading-relaxed">
-            <strong>**주요 지원 혜택은 주로 '청년 부동산 중개보수 및 이사비 지원사업'**</strong>의 형태이며, 지자체별로 지원 내용 및 자격 요건에 차이가 있습니다.
-          </p>
-
-          <p className="text-base leading-relaxed">
-            일반적으로는 다음과 같은 내용을 지원받을 수 있습니다:
-          </p>
-
-          <div className="mt-4 space-y-3">
-            <div className="flex items-start gap-2">
-              <span className="text-xl">🏠</span>
-              <h3 className="text-lg font-bold text-gray-900">청년 이사비 지원사업 주요 내용</h3>
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`flex ${
+              msg.role === "USER" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`rounded-2xl px-5 py-4 max-w-[85%] text-base leading-relaxed shadow-sm ${
+                msg.role === "USER"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-900"
+              }`}
+            >
+              {msg.role === "USER" ? (
+                <span className="whitespace-pre-wrap">{msg.content}</span>
+              ) : (
+                <div className="space-y-2">{renderMessage(msg.content)}</div>
+              )}
             </div>
+          </div>
+        ))}
 
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-1">• 지원 대상:</h4>
-              <div className="pl-4 space-y-1 text-gray-700">
-                <p>• 연령: 만 19세에서 39세 사이의 청년<br />
-                <span className="text-sm text-gray-500">(지자체별로 연령 기준 상이)</span></p>
-                <p>• 주택: 무주택자이며, 특정 보증금 또는 전월세 거래금액 이하의 주택에 거주하는 청년 (예: 보증금 1억원 이하 등)</p>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-1">• 지원 내용:</h4>
-              <div className="pl-4 space-y-1 text-gray-700">
-                <p>• 이사비용: 실비 지원 (예: 최대 30만원)</p>
-                <p>• 중개보수: 부동산 중개 수수료 지원 (예: 최대 20만원)</p>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-1">• 신청 방법:</h4>
-              <div className="pl-4 text-gray-700">
-                <p>거주지 관할 지자체(구청, 시청 등)의 홈페이지 또는 방문 신청</p>
+        {isStreaming && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl px-5 py-4 max-w-[85%] text-base leading-relaxed shadow-sm bg-gray-100 text-gray-900">
+              <div className="space-y-2">
+                {streamingContent
+                  ? renderMessage(streamingContent)
+                  : "답변 작성 중..."}
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {isPending && !isStreaming && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl px-4 py-3 bg-gray-100 text-gray-600 text-sm">
+              답변 작성 중...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center text-sm text-red-500">{error}</div>
+        )}
+
+        <div ref={bottomRef} />
       </div>
 
       {/* Input Box */}
@@ -68,11 +270,29 @@ export default function WelfareSearch() {
           <div className="bg-white rounded-full px-5 py-3 flex items-center gap-3 shadow-[0_0_20px_rgba(59,130,246,0.5),0_0_40px_rgba(147,51,234,0.3)] border border-gray-100">
             <input
               type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="메시지를 입력하세요..."
               className="flex-1 bg-transparent outline-none text-base text-gray-900 placeholder-gray-400"
+              disabled={isPending || isStreaming}
             />
-            <button className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex-shrink-0 hover:from-blue-600 hover:to-purple-700 transition-all">
-              <IoSend className="w-5 h-5 text-white" />
+            <button
+              onClick={handleSend}
+              disabled={isPending || isStreaming || !input.trim()}
+              className={`p-2 rounded-full flex-shrink-0 transition-all ${
+                isPending || isStreaming || !input.trim()
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              }`}
+            >
+              <IoSend
+                className={`w-5 h-5 ${
+                  isPending || isStreaming || !input.trim()
+                    ? "text-gray-500"
+                    : "text-white"
+                }`}
+              />
             </button>
           </div>
         </div>
@@ -80,5 +300,5 @@ export default function WelfareSearch() {
 
       <NavBar />
     </div>
-  )
+  );
 }
