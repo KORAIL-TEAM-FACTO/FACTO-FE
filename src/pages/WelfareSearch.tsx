@@ -29,16 +29,52 @@ export default function WelfareSearch() {
   const { mutateAsync: sendChat, isPending } = useChatSend();
 
   const renderInline = (text: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*)/);
-    return parts.map((part, idx) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
+    // First handle bold markers, then within each segment detect URLs
+    const boldSegments = text.split(/(\*\*[^*]+\*\*)/);
+    return boldSegments.map((segment, bIdx) => {
+      if (segment.startsWith("**") && segment.endsWith("**")) {
         return (
-          <strong key={idx} className="font-semibold">
-            {part.slice(2, -2)}
+          <strong key={`b-${bIdx}`} className="font-semibold">
+            {segment.slice(2, -2)}
           </strong>
         );
       }
-      return <span key={idx}>{part}</span>;
+      // URL detection inside non-bold text
+      const urlRegex = /(https?:\/\/[^\s)]+)|(www\.[^\s)]+)/g;
+      const parts: Array<string> = [];
+      let lastIndex = 0;
+      let match: RegExpExecArray | null;
+      const regex = new RegExp(urlRegex);
+      while ((match = regex.exec(segment)) !== null) {
+        const urlText = match[0];
+        if (match.index > lastIndex) {
+          parts.push(segment.slice(lastIndex, match.index));
+        }
+        parts.push(urlText);
+        lastIndex = match.index + urlText.length;
+      }
+      if (lastIndex < segment.length) {
+        parts.push(segment.slice(lastIndex));
+      }
+
+      return parts.map((part, idx) => {
+        const isUrl = /(https?:\/\/[^\s)]+)|(www\.[^\s)]+)/.test(part);
+        if (isUrl) {
+          const href = part.startsWith("http") ? part : `https://${part}`;
+          return (
+            <a
+              key={`l-${bIdx}-${idx}`}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline break-all"
+            >
+              {part}
+            </a>
+          );
+        }
+        return <span key={`t-${bIdx}-${idx}`}>{part}</span>;
+      });
     });
   };
 
