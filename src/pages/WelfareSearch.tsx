@@ -65,7 +65,7 @@ export default function WelfareSearch() {
       return (
         <p
           key={pIdx}
-          className="text-base text-gray-900 whitespace-pre-wrap leading-relaxed"
+          className="text-base text-gray-900 whitespace-pre-wrap leading-relaxed break-words overflow-hidden"
         >
           {renderInline(para)}
         </p>
@@ -231,7 +231,9 @@ export default function WelfareSearch() {
               {msg.role === "USER" ? (
                 <span className="whitespace-pre-wrap">{msg.content}</span>
               ) : (
-                <div className="space-y-2">{renderMessage(msg.content)}</div>
+                <div className="space-y-2 break-words overflow-hidden">
+                  {renderMessage(msg.content)}
+                </div>
               )}
             </div>
           </div>
@@ -239,7 +241,7 @@ export default function WelfareSearch() {
 
         {isStreaming && (
           <div className="flex justify-start">
-            <div className="rounded-2xl px-5 py-4 max-w-[85%] text-base leading-relaxed shadow-sm bg-gray-100 text-gray-900">
+            <div className="rounded-2xl px-5 py-4 max-w-[85%] text-base leading-relaxed shadow-sm bg-gray-100 text-gray-900 break-words overflow-hidden">
               <div className="space-y-2">
                 {streamingContent
                   ? renderMessage(streamingContent)
