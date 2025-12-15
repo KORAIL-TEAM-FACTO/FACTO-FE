@@ -41,6 +41,7 @@ export default function WelfareDetail() {
   const [welfareData, setWelfareData] = useState<WelfareDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAiSummary, setShowAiSummary] = useState(false);
 
   useEffect(() => {
     const fetchWelfareDetail = async () => {
@@ -53,6 +54,11 @@ export default function WelfareDetail() {
       try {
         const response = await instance2.get(`/welfare-services/${serviceId}`);
         setWelfareData(response.data);
+
+        // AI 요약 2초 후 표시
+        setTimeout(() => {
+          setShowAiSummary(true);
+        }, 2000);
 
         // 로그인한 사용자라면 최근 본 목록에 추가
         try {
@@ -142,9 +148,16 @@ export default function WelfareDetail() {
                 {welfareData.service_type === "LOCAL" ? "지자체" : "중앙"}
               </span>
             </div>
-            <p className="text-[17px] text-gray-700 mb-4">
-              {welfareData.ai_summary}
-            </p>
+            {!showAiSummary ? (
+              <div className="flex items-center gap-2 text-[17px] text-gray-600 mb-4">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <span>AI가 요약 생성 중...</span>
+              </div>
+            ) : (
+              <p className="text-[17px] text-gray-700 mb-4">
+                {welfareData.ai_summary}
+              </p>
+            )}
             <div className="flex items-center gap-2 text-[15px] text-gray-600">
               <svg
                 className="w-4 h-4"
@@ -172,9 +185,7 @@ export default function WelfareDetail() {
           {/* Info Cards */}
           <div className="space-y-3 mb-6">
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <h3 className="text-[15px] font-bold text-gray-700 mb-2">
-                지역
-              </h3>
+              <h3 className="text-[15px] font-bold text-gray-700 mb-2">지역</h3>
               <p className="text-[17px] text-gray-900">
                 {welfareData.ctpv_nm} {welfareData.sgg_nm}
               </p>
@@ -269,7 +280,10 @@ export default function WelfareDetail() {
             </div>
 
             <div className="text-[13px] text-gray-500">
-              <p>사업 기간: {welfareData.project_start_date} ~ {welfareData.project_end_date}</p>
+              <p>
+                사업 기간: {welfareData.project_start_date} ~{" "}
+                {welfareData.project_end_date}
+              </p>
               <p>최종 수정일: {welfareData.last_modified_date}</p>
             </div>
           </div>
