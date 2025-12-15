@@ -58,8 +58,8 @@ export interface User {
   email: string;
   name: string;
   life_cycle: LifeCycle;
-  household_status: HouseholdStatus;
-  interest_theme: InterestTheme;
+  household_status: HouseholdStatus[];
+  interest_theme: InterestTheme[];
   age: number;
   sido_name: string;
   sigungu_name: string;
@@ -69,8 +69,8 @@ export interface User {
 export interface UpdateProfileRequest {
   name?: string;
   life_cycle?: LifeCycle;
-  household_status?: HouseholdStatus;
-  interest_theme?: InterestTheme;
+  household_status?: HouseholdStatus[];
+  interest_theme?: InterestTheme[];
   age?: number;
   sido_name?: string;
   sigungu_name?: string;

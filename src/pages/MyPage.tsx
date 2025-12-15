@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { FiEdit2 } from "react-icons/fi";
 import NavBar from "../components/NavBar";
 import { useMe, logout } from "../apis";
 
@@ -34,7 +35,7 @@ export default function MyPage() {
 
         {/* Profile Section */}
         <div className="bg-white p-6 mb-2">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mr-4">
                 <svg
@@ -58,6 +59,13 @@ export default function MyPage() {
                 </p>
               </div>
             </div>
+            <button
+              onClick={() => navigate("/mypage/edit")}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="정보 수정"
+            >
+              <FiEdit2 className="w-6 h-6 text-gray-700" />
+            </button>
           </div>
         </div>
 
