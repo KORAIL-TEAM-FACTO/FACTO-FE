@@ -359,12 +359,12 @@ export default function SignUp() {
 
           {/* Step 4: 관심주제 */}
           {currentStep === 4 && (
-            <div>
+            <div className="flex flex-col">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 관심주제를 선택해주세요
               </h2>
               <p className="text-gray-600 text-sm mb-8">중복 선택 가능합니다</p>
-              <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              <div className="flex flex-col space-y-3 overflow-y-auto">
                 {interestOptions.map((option) => (
                   <button
                     key={option.code}
