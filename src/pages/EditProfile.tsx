@@ -78,6 +78,9 @@ export default function EditProfile() {
   const [sigunguName, setSigunguName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const koreanRegex = /^[\uAC00-\uD7A3]+$/;
+  const sigunguRegex = /^[\uAC00-\uD7A3]+구$/;
+
   useEffect(() => {
     if (user) {
       setName(user.name || "");
@@ -117,14 +120,29 @@ export default function EditProfile() {
       return;
     }
 
-    const ageNum = Number(age);
-    if (!age || isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
-      setError("유효한 나이를 입력해주세요.");
+    if (!koreanRegex.test(name.trim())) {
+      setError("이름은 한글만 입력 가능합니다.");
       return;
     }
 
-    if (!sidoName || !sigunguName) {
+    if (name.trim().length < 2 || name.trim().length >= 10) {
+      setError("이름은 2글자 이상 10글자 미만으로 입력해주세요.");
+      return;
+    }
+
+    const ageNum = Number(age);
+    if (!age || isNaN(ageNum) || ageNum <= 0 || ageNum > 150) {
+      setError("나이는 1~150 사이의 숫자를 입력해주세요.");
+      return;
+    }
+
+    if (!sidoName || !sigunguName.trim()) {
       setError("거주지를 선택해주세요.");
+      return;
+    }
+
+    if (!sigunguRegex.test(sigunguName.trim())) {
+      setError("시군구는 한글로 입력하고 '구'로 끝나야 합니다.");
       return;
     }
 
@@ -184,10 +202,24 @@ export default function EditProfile() {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // 영어와 숫자만 차단
+                if (!/[a-zA-Z0-9]/.test(value)) {
+                  setName(value);
+                }
+                if (error) setError(null);
+              }}
               placeholder="이름을 입력하세요"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
+            {name.trim() &&
+              !error &&
+              (name.trim().length < 2 || name.trim().length >= 10) && (
+                <p className="mt-2 text-sm text-red-500">
+                  이름은 2~9자로 입력해주세요
+                </p>
+              )}
           </div>
 
           {/* Life Cycle */}
@@ -265,12 +297,20 @@ export default function EditProfile() {
               나이 <span className="text-red-500">*</span>
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={age}
-              onChange={(e) => setAge(e.target.value)}
-              placeholder="나이를 입력하세요"
-              min="1"
-              max="120"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || /^\d+$/.test(value)) {
+                  const num = Number(value);
+                  if (value === "" || num <= 150) {
+                    setAge(value);
+                  }
+                }
+                if (error) setError(null);
+              }}
+              placeholder="나이를 입력하세요 (만 나이)"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
@@ -296,11 +336,22 @@ export default function EditProfile() {
               <input
                 type="text"
                 value={sigunguName}
-                onChange={(e) => setSigunguName(e.target.value)}
-                placeholder="시/군/구"
+                onChange={(e) => {
+                  setSigunguName(e.target.value);
+                  if (error) setError(null);
+                }}
+                placeholder="예: 강남구"
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
+            {sigunguName.trim() &&
+              !error &&
+              !sigunguRegex.test(sigunguName.trim()) && (
+                <p className="mt-2 text-sm text-red-500">
+                  시군구는 한글로 입력하고 '구'로 끝나야 합니다
+                </p>
+              )}
+            <div className="hidden"></div>
           </div>
 
           {error && (
