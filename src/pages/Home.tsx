@@ -137,9 +137,6 @@ export default function Home() {
             <h2 className="font-bold text-[19px] text-gray-900">
               받을 수 있는 혜택
             </h2>
-            <button className="text-[15px] text-blue-600 font-medium">
-              전체보기
-            </button>
           </div>
           {isLoadingCustom ? (
             <div className="flex items-center justify-center py-12">
@@ -207,9 +204,6 @@ export default function Home() {
             <h2 className="font-bold text-[19px] text-gray-900">
               인기있는 복지 서비스를 알아보세요
             </h2>
-            <button className="text-[15px] text-blue-600 font-medium">
-              전체보기
-            </button>
           </div>
           {isLoadingTrending ? (
             <div className="flex items-center justify-center py-12">
